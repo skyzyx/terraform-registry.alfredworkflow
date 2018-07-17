@@ -10,7 +10,7 @@ For brevity, this workflow is triggered with `tf`. Items preceded with the üëç
 ![](README.png)  
 ![](README3.png)  
 
-**[Download!](terraform-registry.alfredworkflow)** Requires [Alfred 3 and the PowerPack](https://www.alfredapp.com/powerpack/).
+**[Download!](terraform-registry.alfredworkflow?raw=true)** Requires [Alfred 3 and the PowerPack](https://www.alfredapp.com/powerpack/).
 
 ## Developing/Deploying
 
