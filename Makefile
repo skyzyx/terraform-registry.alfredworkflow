@@ -17,6 +17,7 @@ lint:
 
 .PHONY: package
 package:
+	upx --brute bin/tfregistry
 	mkdir -p terraform-registry
 	rm -Rf terraform-registry
 	mkdir -p terraform-registry
