@@ -11,10 +11,18 @@ install-deps:
 build:
 	go build -ldflags="-s -w" -o bin/tfregistry main.go
 
-.PHONY: package
-package:
-	env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bin/tfregistry main.go
-
 .PHONY: lint
 lint:
 	gometalinter.v2 ./main.go
+
+.PHONY: package
+package:
+	mkdir -p terraform-registry
+	rm -Rf terraform-registry
+	mkdir -p terraform-registry
+	cp -rv bin terraform-registry/
+	cp -rv images terraform-registry/
+	cp -v *.png terraform-registry/
+	cp -v *.plist terraform-registry/
+	zip -r terraform-registry.zip terraform-registry/
+	mv -v terraform-registry.zip terraform-registry.alfredworkflow

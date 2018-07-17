@@ -100,7 +100,9 @@
 		</dict>
 	</array>
 	<key>readme</key>
-	<string>README</string>
+	<string>This workflow searches Terraform Module Registry (https://registry.terraform.io) for matching modules.
+
+You can get the source code and updates from https://github.com/skyzyx/terraform-registry.alfredworkflow.</string>
 	<key>uidata</key>
 	<dict>
 		<key>35286CAB-25A5-466B-869D-79EE321E12D1</key>
@@ -118,6 +120,8 @@
 			<integer>110</integer>
 		</dict>
 	</dict>
+	<key>version</key>
+	<string>1.0.0</string>
 	<key>webaddress</key>
 	<string>http://ryanparman.com</string>
 </dict>

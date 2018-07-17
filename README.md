@@ -1,7 +1,10 @@
 # terraform-registry.alfredworkflow
 
+An Alfred PowerPack Workflow for searching the Terraform Registry for shared modules.
 
 ## Usage
+
+
 
 ## Developing/Deploying
 
@@ -34,11 +37,9 @@ gometalinter.v2 --install
 
 ### Developing
 
-
-
 ```bash
 make build
-bin/cert-checker
+bin/tfregistry "vault"
 ```
 
 Make sure that you run the linter to catch any issues.
