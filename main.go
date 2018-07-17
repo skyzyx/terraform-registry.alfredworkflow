@@ -63,7 +63,7 @@ type AlfredItem struct {
 
 	// Complex objects
 	Icon AlfredIcon `json:"icon,omitempty"`
-	// Mods AlfredModifierKeys `json:"mods,omitempty"`
+	Mods AlfredModifierKeys `json:"mods,omitempty"`
 	Text AlfredText `json:"text,omitempty"`
 }
 
@@ -77,16 +77,17 @@ type AlfredText struct {
 	LargeType string `json:"largetype,omitempty"`
 }
 
-// type AlfredModifierKeys struct {
-// 	Alt     AlfredModifierKey `json:"alt,omitempty"`
-// 	Command AlfredModifierKey `json:"cmd,omitempty"`
-// }
+type AlfredModifierKeys struct {
+	Alt     AlfredModifierKey `json:"alt,omitempty"`
+	Command AlfredModifierKey `json:"cmd,omitempty"`
+}
 
-// type AlfredModifierKey struct {
-// 	Arg      string `json:"arg,omitempty"`
-// 	Subtitle string `json:"subtitle,omitempty"`
-// 	Valid    bool   `json:"valid,omitempty"`
-// }
+type AlfredModifierKey struct {
+	Arg          string `json:"arg,omitempty"`
+	Subtitle     string `json:"subtitle,omitempty"`
+	QuicklookUrl string `json:"quicklookurl,omitempty"`
+	Valid        bool   `json:"valid,omitempty"`
+}
 
 // The core function
 func main() {
@@ -117,6 +118,8 @@ func main() {
 
 	// Results
 	for _, module := range doc.Modules {
+		regUrl := fmt.Sprintf("https://registry.terraform.io/modules/%s", module.Id)
+
 		alfred.Items = append(alfred.Items, AlfredItem{
 			UID: module.Id,
 			Title: fmt.Sprintf(
@@ -126,8 +129,8 @@ func main() {
 				module.Name,
 			),
 			Subtitle:     module.Description,
-			Arg:          module.Source,
-			QuicklookUrl: module.Source,
+			Arg:          regUrl,
+			QuicklookUrl: regUrl,
 			Valid:        true,
 			Type:         "default",
 			// Autocomplete string `json:"autocomplete,omitempty"`
@@ -139,6 +142,14 @@ func main() {
 			Text: AlfredText{
 				Copy:      module.Source,
 				LargeType: module.Source,
+			},
+			Mods: AlfredModifierKeys{
+				Alt: AlfredModifierKey{
+					Arg: module.Source,
+					Subtitle: fmt.Sprintf("Open %s in your default browser.", module.Source),
+					QuicklookUrl: module.Source,
+					Valid: true,
+				},
 			},
 		})
 	}

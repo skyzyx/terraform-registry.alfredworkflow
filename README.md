@@ -4,7 +4,17 @@ An Alfred PowerPack Workflow for searching the Terraform Registry for shared mod
 
 ## Usage
 
-For brevity, this workflow is triggered with `tf`. Items preceded with the 👍🏼 emoji have been _verified_.
+`tf {query}` — Search for a module.
+
+Items preceded with the 👍🏼 emoji have been _verified_.
+
+### Actions
+
+`↩` — Open the module in the Terraform Registry UI.
+`⌘↩` — Open the module’s source repository.
+`⇧/⌘Y` — Quicklook details﻿
+
+### Screenshots
 
 ![](README2.png)  
 ![](README.png)  
