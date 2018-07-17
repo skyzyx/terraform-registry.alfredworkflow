@@ -6,11 +6,9 @@ An Alfred PowerPack Workflow for searching the Terraform Registry for shared mod
 
 For brevity, this workflow is triggered with `tf`. Items preceded with the 👍🏼 emoji have been _verified_.
 
-![](README2.png)
-
-![](README.png)
-
-![](README3.png)
+![](README2.png)  
+![](README.png)  
+![](README3.png)  
 
 ## Developing/Deploying
 
