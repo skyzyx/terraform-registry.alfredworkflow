@@ -1,5 +1,4 @@
-// Copyright (c) 2018 Ryan Parman <https://ryanparman.com>
-// Copyright (c) 2018 Contributors <https://github.com/skyzyx/terraform-registry.alfredworkflow/graphs/contributors>
+// Copyright (c) 2018-2022 Ryan Parman <https://ryanparman.com>
 //
 // https://www.alfredapp.com/help/workflows/inputs/script-filter/json/
 
@@ -10,31 +9,36 @@ import (
 	"fmt"
 	"net/url"
 	"os"
+	"strings"
 	"time"
 
-	// "github.com/davecgh/go-spew/spew"
+	// "github.com/davecgh/go-spew/spew".
 	"github.com/parnurzeal/gorequest"
 )
 
 var (
-	doc         InputDocument
+	doc         inputDocument
 	querystring string
 )
 
-type InputDocument struct {
-	Meta    InputMeta     `json:"meta"`
-	Modules []InputModule `json:"modules"`
+const (
+	minArgs = 2
+)
+
+type inputDocument struct {
+	Meta    inputMeta     `json:"meta"`
+	Modules []inputModule `json:"modules"`
 }
 
-type InputMeta struct {
+type inputMeta struct {
 	CurrentOffset int64 `json:"current_offset"`
 	Limit         int64 `json:"limit"`
 }
 
-type InputModule struct {
+type inputModule struct {
 	Description string    `json:"description"`
 	Downloads   int64     `json:"downloads"`
-	Id          string    `json:"id"`
+	ID          string    `json:"id"`
 	Name        string    `json:"name"`
 	Namespace   string    `json:"namespace"`
 	Owner       string    `json:"owner"`
@@ -45,16 +49,16 @@ type InputModule struct {
 	Version     string    `json:"version"`
 }
 
-type AlfredDocument struct {
-	Items []AlfredItem `json:"items,omitempty"`
+type alfredDocument struct {
+	Items []alfredItem `json:"items,omitempty"`
 }
 
-type AlfredItem struct {
+type alfredItem struct {
 	// Simple objects
 	Arg          string `json:"arg,omitempty"`
 	Autocomplete string `json:"autocomplete,omitempty"`
 	Match        string `json:"match,omitempty"`
-	QuicklookUrl string `json:"quicklookurl,omitempty"`
+	QuicklookURL string `json:"quicklookurl,omitempty"`
 	Subtitle     string `json:"subtitle,omitempty"`
 	Title        string `json:"title,omitempty"`
 	Type         string `json:"type,omitempty"`
@@ -62,101 +66,109 @@ type AlfredItem struct {
 	Valid        bool   `json:"valid,omitempty"`
 
 	// Complex objects
-	Icon AlfredIcon `json:"icon,omitempty"`
-	Mods AlfredModifierKeys `json:"mods,omitempty"`
-	Text AlfredText `json:"text,omitempty"`
+	Icon alfredIcon         `json:"icon,omitempty"`
+	Mods alfredModifierKeys `json:"mods,omitempty"`
+	Text alfredText         `json:"text,omitempty"`
 }
 
-type AlfredIcon struct {
+type alfredIcon struct {
 	Path string `json:"path,omitempty"`
 	Type string `json:"type,omitempty"`
 }
 
-type AlfredText struct {
+type alfredText struct {
 	Copy      string `json:"copy,omitempty"`
 	LargeType string `json:"largetype,omitempty"`
 }
 
-type AlfredModifierKeys struct {
-	Alt     AlfredModifierKey `json:"alt,omitempty"`
-	Command AlfredModifierKey `json:"cmd,omitempty"`
+type alfredModifierKeys struct {
+	Alt     alfredModifierKey `json:"alt,omitempty"`
+	Command alfredModifierKey `json:"cmd,omitempty"`
 }
 
-type AlfredModifierKey struct {
+type alfredModifierKey struct {
 	Arg          string `json:"arg,omitempty"`
 	Subtitle     string `json:"subtitle,omitempty"`
-	QuicklookUrl string `json:"quicklookurl,omitempty"`
+	QuicklookURL string `json:"quicklookurl,omitempty"`
 	Valid        bool   `json:"valid,omitempty"`
 }
 
-// The core function
+// The core function.
 func main() {
-	alfred := new(AlfredDocument)
-	querystring = url.QueryEscape(os.Args[1])
+	alfred := new(alfredDocument)
 
-	_, body, _ := gorequest.New().Get("https://registry.terraform.io/v1/modules/search?limit=15&offset=0&q=" + querystring).End()
-	err := json.Unmarshal([]byte(body), &doc)
-
-	if err != nil {
-		fmt.Println(err)
+	if len(os.Args) < minArgs {
+		fmt.Fprintf(os.Stderr, "A string to search for is required.")
 		os.Exit(1)
 	}
 
-	// spew.Dump(doc)
+	querystring = url.QueryEscape(
+		strings.Join(os.Args[1:], " "),
+	)
+
+	_, body, _ := gorequest.New().Get(
+		fmt.Sprintf("https://registry.terraform.io/v1/modules/search?limit=15&offset=0&q=%s", querystring),
+	).End()
+
+	err := json.Unmarshal([]byte(body), &doc)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %s", err)
+		os.Exit(1)
+	}
 
 	// No results
 	if len(doc.Modules) == 0 {
-		alfred.Items = append(alfred.Items, AlfredItem{
+		alfred.Items = append(alfred.Items, alfredItem{
 			Title: "No results found.",
 			Valid: false,
-			Type: "default",
-			Icon: AlfredIcon{
+			Type:  "default",
+			Icon: alfredIcon{
 				Path: "images/terraform.png",
 			},
 		})
 	}
 
 	// Results
-	for _, module := range doc.Modules {
-		regUrl := fmt.Sprintf("https://registry.terraform.io/modules/%s", module.Id)
+	for i := range doc.Modules {
+		module := &doc.Modules[i]
 
-		alfred.Items = append(alfred.Items, AlfredItem{
-			UID: module.Id,
+		regURL := fmt.Sprintf("https://registry.terraform.io/modules/%s", module.ID)
+
+		alfred.Items = append(alfred.Items, alfredItem{
+			UID: module.ID,
 			Title: fmt.Sprintf(
 				"%s%s/%s",
-				map[bool]string{true: "👍🏼 ", false: ""}[module.Verified],
+				map[bool]string{true: "⭐️ ", false: ""}[module.Verified],
 				module.Namespace,
 				module.Name,
 			),
 			Subtitle:     module.Description,
-			Arg:          regUrl,
-			QuicklookUrl: regUrl,
+			Arg:          regURL,
+			QuicklookURL: regURL,
 			Valid:        true,
 			Type:         "default",
 			// Autocomplete string `json:"autocomplete,omitempty"`
 			// Match        string `json:"match,omitempty"`
-			Icon: AlfredIcon{
+			Icon: alfredIcon{
 				// Type: "fileicon",
 				Path: fmt.Sprintf("images/%s.png", determineIcon(module.Provider)),
 			},
-			Text: AlfredText{
+			Text: alfredText{
 				Copy:      module.Source,
 				LargeType: module.Source,
 			},
-			Mods: AlfredModifierKeys{
-				Alt: AlfredModifierKey{
-					Arg: module.Source,
-					Subtitle: fmt.Sprintf("Open %s in your default browser.", module.Source),
-					QuicklookUrl: module.Source,
-					Valid: true,
+			Mods: alfredModifierKeys{
+				Alt: alfredModifierKey{
+					Arg:          module.Source,
+					Subtitle:     fmt.Sprintf("Open %s in your default browser.", module.Source),
+					QuicklookURL: module.Source,
+					Valid:        true,
 				},
 			},
 		})
 	}
 
-	// output, err := json.Marshal(alfred)
 	output, err := json.MarshalIndent(alfred, "", "    ")
-
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -167,7 +179,8 @@ func main() {
 
 func determineIcon(provider string) string {
 	switch provider {
-	case "alibaba", "aws", "azurerm", "digitalocean", "github", "google", "hashicorp", "kubernetes", "opc", "terraform":
+	case "alibaba", "aws", "azurerm", "digitalocean", "github", "google",
+		"hashicorp", "kubernetes", "opc", "terraform":
 		return provider
 	default:
 		return "generic"
