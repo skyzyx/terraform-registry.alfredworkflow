@@ -8,7 +8,7 @@ See [releases](https://github.com/skyzyx/terraform-registry.alfredworkflow/relea
 
 `tf {query}` — Search for a module.
 
-Items preceded with the 👍🏼 emoji have been _verified_.
+Items preceded with the star emoji have been _verified_.
 
 ### Actions
 
