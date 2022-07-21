@@ -86,6 +86,7 @@ golint:
 	@ $(ECHO) " "
 	@ $(ECHO) "=====> Running gofmt and golangci-lint..."
 	gofmt -s -w *.go
+	gofumpt -e -l -s *.go
 	golangci-lint run --fix *.go
 
 .PHONY: goupdate
@@ -135,23 +136,23 @@ lint: markdownlint golint goupdate goconsistent goimportorder goconst
 tag:
 	@ if [ $$(git status -s -uall | wc -l) != 1 ]; then echo 'ERROR: Git workspace must be clean.'; exit 1; fi;
 
-	@echo "This release will be tagged as: $$(cat ./VERSION)"
-	@echo "This version should match your release. If it doesn't, re-run 'make version'."
-	@echo "---------------------------------------------------------------------"
-	@read -p "Press any key to continue, or press Control+C to cancel. " x;
+	@ $(ECHO) "This release will be tagged as: $$(cat ./VERSION)"
+	@ $(ECHO) "This version should match your release. If it doesn't, re-run 'make version'."
+	@ $(ECHO) "---------------------------------------------------------------------"
+	@ read -p "Press any key to continue, or press Control+C to cancel. " x;
 
-	@echo " "
-	@chag update $$(cat ./VERSION)
-	@echo " "
+	@ $(ECHO) " "
+	@ chag update $$(cat ./VERSION)
+	@ $(ECHO) " "
 
-	@echo "These are the contents of the CHANGELOG for this release. Are these correct?"
-	@echo "---------------------------------------------------------------------"
-	@chag contents
-	@echo "---------------------------------------------------------------------"
-	@echo "Are these release notes correct? If not, cancel and update CHANGELOG.md."
-	@read -p "Press any key to continue, or press Control+C to cancel. " x;
+	@ $(ECHO) "These are the contents of the CHANGELOG for this release. Are these correct?"
+	@ $(ECHO) "---------------------------------------------------------------------"
+	@ chag contents
+	@ $(ECHO) "---------------------------------------------------------------------"
+	@ $(ECHO) "Are these release notes correct? If not, cancel and update CHANGELOG.md."
+	@ read -p "Press any key to continue, or press Control+C to cancel. " x;
 
-	@echo " "
+	@ $(ECHO) " "
 
 	git add .
 	git commit -a -m "Preparing the $$(cat ./VERSION) release."
@@ -160,8 +161,8 @@ tag:
 .PHONY: version
 ## version: [release] Sets the version for the next release; pre-req for a release tag.
 version:
-	@echo "Current version: $$(cat ./VERSION)"
-	@read -p "Enter new version number: " nv; \
+	@ $(ECHO) "Current version: $$(cat ./VERSION)"
+	@ read -p "Enter new version number: " nv; \
 	printf "$$nv" > ./VERSION
 
 .PHONY: release
@@ -172,13 +173,20 @@ release:
 .PHONY: package
 ## package: [release]* Compiles a local copy of the workflow without notarizing/releasing it.
 package: build
+	@ $(ECHO) " "
+	@ $(ECHO) "=====> Ensure that we start with a clean directory, without errors..."
 	mkdir -p terraform-registry
 	rm -Rf terraform-registry
 	mkdir -p terraform-registry
+
+	@ $(ECHO) " "
+	@ $(ECHO) "=====> Copy over the necessary files..."
 	cp -rv bin terraform-registry/
 	cp -rv images terraform-registry/
-	cp -v *.png terraform-registry/
 	cp -v *.plist terraform-registry/
-	zip -r terraform-registry.zip terraform-registry/
+
+	@ $(ECHO) " "
+	@ $(ECHO) "=====> Package everything up..."
+	cd terraform-registry/ && zip -r ../terraform-registry.zip *
 	mv -v terraform-registry.zip terraform-registry.alfredworkflow
-	open terraform-registry.alfredworkflow
+	# open terraform-registry.alfredworkflow

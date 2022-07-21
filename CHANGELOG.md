@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
-* Modernized the codebase for Go 1.17.
+* Modernized the codebase for Go 1.18.
 * Switched to `golangci-lint` for linting the Go code.
 * Added Markdownlint for linting the README and other docs.
 * Simplified the README.
