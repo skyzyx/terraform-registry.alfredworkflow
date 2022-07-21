@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## Unreleased
+## 1.1.0 - 2022-07-21
 
 * Modernized the codebase for Go 1.18.
 * Switched to `golangci-lint` for linting the Go code.
